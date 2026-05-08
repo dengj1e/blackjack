@@ -253,7 +253,7 @@
       const res = await fetch('http://localhost:8000/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dealt: playerCards, dealer: dealerCard })
+        body: JSON.stringify({ delt: playerCards, dealer: dealerCard })
       });
       const data = await res.json();
       const pct = v => (v * 100).toFixed(1) + '%';

@@ -13,7 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/recommend", response_model=HandResponse)
-def recommend(hand: HandRequest):
-    result = calculate(hand.dealt, hand.dealer)
+@app.post("/recommend", response_model=response)
+def recommend(hand: front_json):
+    result = calculate(hand.delt, hand.dealer)
     return result
