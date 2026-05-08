@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackjack calc</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --felt: #1e4030;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --cream: #f5f0e8;
+      --red: #c0392b;
+      --text: #f5f0e8;
+      --text-muted: #8aab96;
+      --card-bg: #faf8f3;
+      --card-border: #d4c9b0;
+    }
+    body {
+      background: var(--felt);
+      background-image: radial-gradient(ellipse at 50% 0%, #2a5040 0%, #1a3328 60%);
+      min-height: 100vh;
+      font-family: 'DM Mono', monospace;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+      text-align: center;
+    }
+    .subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    .card-picker {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      width: 100%;
+      max-width: 560px;
+    }
+    .ranks { display: flex; flex-wrap: wrap; gap: 8px; }
+    .rank-btn {
+      width: 44px; height: 56px;
+      border-radius: 8px;
+      border: 1.5px solid var(--card-border);
+      background: var(--card-bg);
+      color: #1a1a1a;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .rank-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+    .rank-btn.red { color: var(--red); }
+    .hand-display {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      min-height: 64px; align-items: center; margin-top: 1rem;
+    }
+    .dealt-card {
+      width: 44px; height: 56px;
+      border-radius: 8px;
+      border: 1.5px solid var(--card-border);
+      background: var(--card-bg);
+      color: #1a1a1a;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      position: relative;
+      animation: dealIn 0.2s ease;
+    }
+    .dealt-card.red { color: var(--red); }
+    .dealt-card:hover { outline: 2px solid var(--red); }
+    .empty-hand { color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.1em; }
+    @keyframes dealIn {
+      from { transform: translateY(-10px) scale(0.9); opacity: 0; }
+      to   { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .actions { display: flex; gap: 10px; margin-bottom: 1.5rem; width: 100%; max-width: 560px; }
+    .btn-recommend {
+      flex: 1; padding: 0.85rem;
+      background: var(--gold); color: #1a1a1a;
+      border: none; border-radius: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-recommend:hover { background: var(--gold-light); }
+    .btn-clear {
+      padding: 0.85rem 1.25rem;
+      background: transparent; color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+    .btn-clear:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+    .result {
+      width: 100%; max-width: 560px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 12px; padding: 1.5rem;
+      display: none;
+    }
+    .result.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .action-badge {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; color: var(--gold);
+      margin-bottom: 1.25rem; text-transform: capitalize;
+    }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .stat { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 0.75rem 0.5rem; text-align: center; }
+    .stat-label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; }
+    .stat-value { font-size: 1.1rem; font-weight: 500; color: var(--cream); }
+    .stat-value.win  { color: #4caf79; }
+    .stat-value.lose { color: #e07070; }
+    .hand-info { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .error { color: #e07070; font-size: 0.8rem; margin-bottom: 0.75rem; display: none; width: 100%; max-width: 560px; }
+  </style>
+</head>
+<body>
+  <h1>Blackjack Advisor</h1>
+  <p class="subtitle">Optimal play · Single deck</p>
+
+  <div class="card-picker">
+    <div class="section-label">Your hand</div>
+    <div class="ranks" id="player-ranks"></div>
+    <div class="hand-display" id="player-hand">
+      <span class="empty-hand">Click cards to add them</span>
+    </div>
+  </div>
+
+  <div class="card-picker">
+    <div class="section-label">Dealer upcard</div>
+    <div class="ranks" id="dealer-ranks"></div>
+    <div class="hand-display" id="dealer-hand">
+      <span class="empty-hand">Select one card</span>
+    </div>
+  </div>
+
+  <p class="error" id="error-msg"></p>
+
+  <div class="actions">
+    <button class="btn-recommend" onclick="recommend()">Get recommendation</button>
+    <button class="btn-clear" onclick="clearAll()">Clear</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="hand-info" id="hand-info"></div>
+    <div class="action-badge" id="action-text"></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Win</div><div class="stat-value win" id="stat-win"></div></div>
+      <div class="stat"><div class="stat-label">Lose</div><div class="stat-value lose" id="stat-lose"></div></div>
+      <div class="stat"><div class="stat-label">Tie</div><div class="stat-value" id="stat-tie"></div></div>
+      <div class="stat"><div class="stat-label">Bust</div><div class="stat-value" id="stat-bust"></div></div>
+    </div>
+  </div>
+
+<script>
+  const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+  const RED = new Set(["A","J","Q","K"]);
+
+  let playerCards = [];
+  let dealerCard = null;
+
+  function makeCard(rank, onclick) {
+    const div = document.createElement('div');
+    div.className = 'dealt-card' + (RED.has(rank) ? ' red' : '');
+    div.textContent = rank;
+    div.onclick = onclick;
+    return div;
+  }
+
+  function renderPlayerHand() {
+    const el = document.getElementById('player-hand');
+    el.innerHTML = '';
+    if (playerCards.length === 0) {
+      el.innerHTML = '<span class="empty-hand">Click cards to add them</span>';
+      return;
+    }
+    playerCards.forEach((r, i) => {
+      el.appendChild(makeCard(r, () => {
+        playerCards.splice(i, 1);
+        renderPlayerHand();
+      }));
+    });
+  }
+
+  function renderDealerHand() {
+    const el = document.getElementById('dealer-hand');
+    el.innerHTML = '';
+    if (!dealerCard) {
+      el.innerHTML = '<span class="empty-hand">Select one card</span>';
+      return;
+    }
+    el.appendChild(makeCard(dealerCard, () => {
+      dealerCard = null;
+      renderDealerHand();
+    }));
+  }
+
+  function buildPicker(containerId, clickFn) {
+    const el = document.getElementById(containerId);
+    RANKS.forEach(r => {
+      const btn = document.createElement('button');
+      btn.className = 'rank-btn' + (RED.has(r) ? ' red' : '');
+      btn.textContent = r;
+      btn.onclick = () => clickFn(r);
+      el.appendChild(btn);
+    });
+  }
+
+  buildPicker('player-ranks', r => { playerCards.push(r); renderPlayerHand(); });
+  buildPicker('dealer-ranks', r => { dealerCard = r; renderDealerHand(); });
+
+  async function recommend() {
+    const err = document.getElementById('error-msg');
+    if (playerCards.length < 2 || !dealerCard) {
+      err.textContent = 'Add at least 2 cards to your hand and select a dealer card.';
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+
+    try {
+      const res = await fetch('http://localhost:8000/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dealt: playerCards, dealer: dealerCard })
+      });
+      const data = await res.json();
+      const pct = v => (v * 100).toFixed(1) + '%';
+
+      document.getElementById('hand-info').textContent =
+        `Hand: ${data.hand_value}${data.is_soft ? ' (soft)' : ''} · Dealer shows ${dealerCard}`;
+      document.getElementById('action-text').textContent = data.action;
+      document.getElementById('stat-win').textContent  = pct(data.win);
+      document.getElementById('stat-lose').textContent = pct(data.lose);
+      document.getElementById('stat-tie').textContent  = pct(data.tie);
+      document.getElementById('stat-bust').textContent = pct(data.bust);
+      document.getElementById('result').className = 'result visible';
+    } catch (e) {
+      err.textContent = 'Could not connect to API. Is uvicorn running?';
+      err.style.display = 'block';
+    }
+  }
+
+  function clearAll() {
+    playerCards = [];
+    dealerCard = null;
+    renderPlayerHand();
+    renderDealerHand();
+    document.getElementById('result').className = 'result';
+    document.getElementById('error-msg').style.display = 'none';
+  }
+</script>
+</body>
+</html>
