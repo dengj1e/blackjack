@@ -1,9 +1,8 @@
-import random
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from schema import front_json
-from calc import 
+from schema import front_json, response
+from calc import calculate
 
 app = FastAPI(title="blackjack API")
 
@@ -14,6 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/api/calculations", response_model=response, status_code=200)
-
-    return
+@app.post("/recommend", response_model=HandResponse)
+def recommend(hand: HandRequest):
+    result = calculate(hand.dealt, hand.dealer)
+    return result
