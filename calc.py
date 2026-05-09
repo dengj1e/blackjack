@@ -1,6 +1,6 @@
 # builds a fresh deck
 def build_deck():
-    return {"A":4,"2":4,"3":4,"4":4,"5":4,"6":4,"7":4,"8":4,"9":4,"10":4,"J":4,"Q":4,"K":4}
+    return {"A": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 4, "7": 4, "8": 4, "9": 4, "10": 4, "J": 4, "Q": 4, "K": 4}
 
 
 # remove a card from the deck
@@ -42,15 +42,15 @@ def is_soft(cards):
     while total > 21 and aces:
         total -= 10
         aces -= 1
-    return aces > 0 
+    return aces > 0
 
 
-"""
-assume that the dealer will stand on 17+ 
-we enumerate all possibilities from the remaining cards
-return a list of probabilities of each combination outcome
-"""
 def dealer_outcomes(dealer_cards, deck):
+    """
+    assume that the dealer will stand on 17+
+    we enumerate all possibilities from the remaining cards
+    return a list of probabilities of each combination outcome
+    """
     total = hand_value(dealer_cards)
     
     if total > 21:
@@ -78,11 +78,11 @@ def dealer_outcomes(dealer_cards, deck):
     return results
 
 
-"""
-compare player versus dealer
-we add the probabilities
-"""
 def compare(player_total, dealer_dist):
+    """
+    compare player versus dealer
+    we add the probabilities
+    """
     win = lose = tie = 0.0 
     for dealer_total, prob in dealer_dist.items():
         if dealer_total == "bust" or dealer_total < player_total:
@@ -94,8 +94,8 @@ def compare(player_total, dealer_dist):
     return win, lose, tie
 
 
-# prob that player will bust next hit
 def bust_probability(player_cards, deck):
+    # prob that player will bust next hit
     remaining = sum(deck.values())
     bust_count = 0
     for rank, count in deck.items():
@@ -107,19 +107,19 @@ def bust_probability(player_cards, deck):
     return bust_count / remaining
 
 
-"""
-the probability distribution if the player stands now
-"""
 def ev_stand(player_cards, dealer_upcard, deck):
+    """
+    the probability distribution if the player stands now
+    """
     total = hand_value(player_cards)
     dist = dealer_outcomes([dealer_upcard], deck)
     return compare(total, dist)
 
 
-"""
-the probability distribution if the player doubles ie. hit then stand
-"""
 def ev_double(player_cards, dealer_upcard, deck):
+    """
+    the probability distribution if the player doubles ie. hit then stand
+    """
     remaining = sum(deck.values())
     win = lose = tie = 0.0
     for rank, count in deck.items():
@@ -140,10 +140,10 @@ def ev_double(player_cards, dealer_upcard, deck):
     return win, lose, tie
  
 
-"""
-the probability distribution for hitting once
-"""
 def ev_hit(player_cards, dealer_upcard, deck, cache=None):
+    """
+    the probability distribution for hitting once
+    """
     if cache is None:
         cache = {}
     remaining = sum(deck.values())
@@ -166,10 +166,10 @@ def ev_hit(player_cards, dealer_upcard, deck, cache=None):
     return win, lose, tie
 
 
-"""
-the best possible move for the player right now
-"""
 def best_ev(player_cards, dealer_upcard, deck, cache=None):
+    """
+    the best possible move for the player right now
+    """
     if cache is None:
         cache = {}
     total = hand_value(player_cards)
