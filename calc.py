@@ -138,7 +138,7 @@ def ev_double(player_cards, dealer_upcard, deck):
             lose += prob * l
             tie += prob * p
     return win, lose, tie
- 
+
 
 def ev_hit(player_cards, dealer_upcard, deck, cache=None):
     """
@@ -217,7 +217,7 @@ def calculate(player_cards: list[str], dealer_upcard: str) -> dict:
     if is_first_two:
         double_w, double_l, double_p = ev_double(player_cards, dealer_upcard, deck)
         actions["double"] = (double_w, double_l, double_p)
- 
+
     best_action = max(actions, key=lambda a: actions[a][0] - actions[a][1])
     best_w, best_l, best_p = actions[best_action]
 
@@ -231,4 +231,3 @@ def calculate(player_cards: list[str], dealer_upcard: str) -> dict:
         "bust":   round(bust_pct, 4),
         "is_soft": is_soft(player_cards)
     }
-    
