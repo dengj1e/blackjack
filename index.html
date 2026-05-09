@@ -250,7 +250,7 @@
     err.style.display = 'none';
 
     try {
-      const res = await fetch('http://localhost:8000/recommend', {
+      const res = await fetch('http://localhost:8900/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ delt: playerCards, dealer: dealerCard })

@@ -143,7 +143,9 @@ def ev_double(player_cards, dealer_upcard, deck):
 """
 the probability distribution for hitting once
 """
-def ev_hit(player_cards, dealer_upcard, deck):
+def ev_hit(player_cards, dealer_upcard, deck, cache=None):
+    if cache is None:
+        cache = {}
     remaining = sum(deck.values())
     win = lose = tie = 0.0
     for rank, count in deck.items():
@@ -156,7 +158,7 @@ def ev_hit(player_cards, dealer_upcard, deck):
             lose += prob
         else:
             deck[rank] -= 1
-            w, l, p = best_ev(new_cards, dealer_upcard, deck)
+            w, l, p = best_ev(new_cards, dealer_upcard, deck, cache)
             deck[rank] += 1
             win += prob * w
             lose += prob * l
@@ -167,18 +169,28 @@ def ev_hit(player_cards, dealer_upcard, deck):
 """
 the best possible move for the player right now
 """
-def best_ev(player_cards, dealer_upcard, deck):
+def best_ev(player_cards, dealer_upcard, deck, cache=None):
+    if cache is None:
+        cache = {}
     total = hand_value(player_cards)
+    print(f"best_ev called: total={total}, cards={player_cards}")
     if total > 21:
         return 0.0, 1.0, 0.0
  
+    key = (total, is_soft(player_cards), dealer_upcard, tuple(sorted(deck.items())))
+    if key in cache:
+        return cache[key]
+
     stand_w, stand_l, stand_p = ev_stand(player_cards, dealer_upcard, deck)
-    hit_w, hit_l, hit_p = ev_hit(player_cards, dealer_upcard, deck)
+    hit_w, hit_l, hit_p = ev_hit(player_cards, dealer_upcard, deck, cache)
  
     if (stand_w - stand_l) >= (hit_w - hit_l):
-        return stand_w, stand_l, stand_p
+        result = stand_w, stand_l, stand_p
     else:
-        return hit_w, hit_l, hit_p 
+        result = hit_w, hit_l, hit_p
+    
+    cache[key] = result
+    return result
 
 
 def calculate(player_cards: list[str], dealer_upcard: str) -> dict:
@@ -190,9 +202,11 @@ def calculate(player_cards: list[str], dealer_upcard: str) -> dict:
     # used for double
     is_first_two = len(player_cards) == 2
     player_total = hand_value(player_cards)
+
+    cache = {}
  
     stand_w, stand_l, stand_p = ev_stand(player_cards, dealer_upcard, deck)
-    hit_w, hit_l, hit_p = ev_hit(player_cards, dealer_upcard, deck)
+    hit_w, hit_l, hit_p = ev_hit(player_cards, dealer_upcard, deck, cache)
     bust_pct = bust_probability(player_cards, deck)
  
     actions = {
