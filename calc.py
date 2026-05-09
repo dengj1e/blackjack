@@ -52,29 +52,29 @@ def dealer_outcomes(dealer_cards, deck):
     return a list of probabilities of each combination outcome
     """
     total = hand_value(dealer_cards)
-    
+
     if total > 21:
         return {"bust": 1.0}
     if total >= 17:
         return {total: 1.0}
-    
+
     results = {}
     remaining = sum(deck.values())
-    
+
     # calculate each probability for each rank
     for rank, count in deck.items():
         if count == 0:
             continue
         prob = count / remaining
-        
+
         # remove,recurse, restore
         deck[rank] -= 1
         outcomes = dealer_outcomes(dealer_cards + [rank], deck)
         deck[rank] += 1
-        
+
         for total, p in outcomes.items():
             results[total] = results.get(total, 0) + prob * p
-    
+
     return results
 
 
@@ -83,7 +83,7 @@ def compare(player_total, dealer_dist):
     compare player versus dealer
     we add the probabilities
     """
-    win = lose = tie = 0.0 
+    win = lose = tie = 0.0
     for dealer_total, prob in dealer_dist.items():
         if dealer_total == "bust" or dealer_total < player_total:
             win += prob
@@ -176,19 +176,19 @@ def best_ev(player_cards, dealer_upcard, deck, cache=None):
     print(f"best_ev called: total={total}, cards={player_cards}")
     if total > 21:
         return 0.0, 1.0, 0.0
- 
+
     key = (total, is_soft(player_cards), dealer_upcard, tuple(sorted(deck.items())))
     if key in cache:
         return cache[key]
 
     stand_w, stand_l, stand_p = ev_stand(player_cards, dealer_upcard, deck)
     hit_w, hit_l, hit_p = ev_hit(player_cards, dealer_upcard, deck, cache)
- 
+
     if (stand_w - stand_l) >= (hit_w - hit_l):
         result = stand_w, stand_l, stand_p
     else:
         result = hit_w, hit_l, hit_p
-    
+
     cache[key] = result
     return result
 
@@ -198,29 +198,29 @@ def calculate(player_cards: list[str], dealer_upcard: str) -> dict:
     deck = build_deck()
     # remove the cards we have seen
     remove_cards(deck, player_cards + [dealer_upcard])
- 
+
     # used for double
     is_first_two = len(player_cards) == 2
     player_total = hand_value(player_cards)
 
     cache = {}
- 
+
     stand_w, stand_l, stand_p = ev_stand(player_cards, dealer_upcard, deck)
     hit_w, hit_l, hit_p = ev_hit(player_cards, dealer_upcard, deck, cache)
     bust_pct = bust_probability(player_cards, deck)
- 
+
     actions = {
         "stand": (stand_w, stand_l, stand_p),
         "hit":   (hit_w, hit_l, hit_p),
     }
- 
+
     if is_first_two:
         double_w, double_l, double_p = ev_double(player_cards, dealer_upcard, deck)
         actions["double"] = (double_w, double_l, double_p)
  
     best_action = max(actions, key=lambda a: actions[a][0] - actions[a][1])
     best_w, best_l, best_p = actions[best_action]
- 
+
     # our json response format
     return {
         "action":     best_action,

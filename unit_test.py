@@ -4,6 +4,7 @@ from calc import (
     dealer_outcomes, compare, bust_probability, calculate
 )
 
+
 class TestBuildDeck(unittest.TestCase):
     def test_correct_counts(self):
         deck = build_deck()
@@ -12,7 +13,7 @@ class TestBuildDeck(unittest.TestCase):
 
     def test_correct_ranks(self):
         deck = build_deck()
-        expected = {"A","2","3","4","5","6","7","8","9","10","J","Q","K"}
+        expected = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
         self.assertEqual(set(deck.keys()), expected)
 
     def test_total_cards(self):
